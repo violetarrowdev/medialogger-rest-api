@@ -1,6 +1,8 @@
 package main
 
 import (
+	"encoding/base64"
+	"fmt"
 	"math/rand"
 	"medialogger/server/datastructs"
 	"medialogger/server/privacy"
@@ -36,22 +38,28 @@ func main() {
 	router.POST("/users/:name/media/:uid", postMedia)
 	router.DELETE("/users/:name/media/:uid", deleteMedia)
 	router.POST("/users/:name/logout", postLogout)
+
+	router.Run("localhost:8080")
 }
 
 // handles logins and passes back a session token, needs more security + collision avoidance
 func postLogin(c *gin.Context) {
-	username := c.GetString("username")
+	username := c.PostForm("username")
 	var user, userExists = users[username]
 	if !userExists {
 		c.String(http.StatusUnauthorized, "Bad username or password.")
 		return
 	}
-	pwHash := privacy.HashPassword(c.GetString("password"), user.UUID)
+	password, pwFound := c.GetPostForm("password")
+	if !pwFound {
+		c.String(http.StatusBadRequest, "No password given.")
+	}
+	pwHash := privacy.HashPassword(password, user.UUID)
 	if pwHash != user.PasswordHash {
 		c.String(http.StatusUnauthorized, "Bad username or password.")
 		return
 	}
-	var token uint8 = uint8(rand.Uint32())
+	var token = rand.Uint32()
 	user.SessionToken = token
 
 	c.String(http.StatusOK, "%d", token)
@@ -210,21 +218,29 @@ func postLogout(c *gin.Context) {
 }
 
 func validateSessionToken(c *gin.Context) bool {
-	authHeader := c.GetHeader("authorization")
-	auth := strings.Split(c.GetHeader("authorization"), " ")
+	authHeader := c.GetHeader("Authorization")
+	fmt.Println("Auth Header: " + authHeader)
+	auth := strings.Split(authHeader, " ")
 	if authHeader == "" || len(auth) != 2 || auth[0] != "Basic" {
 		c.String(http.StatusBadRequest, "No session token or badly formed session token.")
 		return false
 	}
 	username := c.Param("name")
 	var user, userExists = users[username]
-	var token64, err = strconv.ParseInt(auth[1], 10, 16)
-	if err == nil {
+	var tokenArr, err = base64.StdEncoding.DecodeString(auth[1])
+	fmt.Println("Token: " + string(tokenArr))
+	if err != nil {
 		c.String(http.StatusBadRequest, "No session token or badly formed session token.")
 		return false
 	}
-	token := uint8(token64)
-	if !userExists || user.SessionToken != token || token <= 0 {
+	tokenStr := strings.Trim(string(tokenArr), ":")
+
+	token, tokenErr := strconv.Atoi(tokenStr)
+	if tokenErr != nil {
+		c.String(http.StatusBadRequest, "No session token or badly formed session token.")
+		return false
+	}
+	if !userExists || user.SessionToken != uint32(token) || token <= 0 {
 		c.String(http.StatusUnauthorized, "User does not exist, or you are not logged into this account.")
 		return false
 	} else {
