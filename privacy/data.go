@@ -8,7 +8,7 @@ import (
 )
 
 func HashPassword(password string, uuid uint32) string {
-	input := password + string(uuid)
+	input := password + fmt.Sprintf("%x", uuid)
 	output := fmt.Sprintf("%x", sha256.Sum256([]byte(input)))
 	return output
 }
