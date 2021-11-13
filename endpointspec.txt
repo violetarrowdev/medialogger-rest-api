@@ -1,0 +1,33 @@
+endpoints:
+
+- /login
+	- POST username and password, response sends session token if successful
+
+- /user/<username>
+	- GET returns sanitized user data
+
+- /user/<username>/email
+	- GETting returns just email address
+	- POSTing new email updates email address
+
+- /user/<username>/password
+	- POSTing old password and new password changes password
+
+- /user/<username>/media
+	- GET returns a list of all media
+	- PUTting with a JSON and unique UID creates a new media entry
+
+- /user/<username>/media/<uid>
+	- POSTing with a UID and a JSON object updates the corresponding media entry
+	- DELETEing a UID removes a media entry
+
+- /user/<username>/lists
+	- GET returns a list of all lists
+	- POSTing a list with a UID 
+
+- /user/<username>/lists/<listname>
+	- GET returns the contents of a specific list
+	- DELETEing returns
+
+- /logout
+	- POSTing session token causes logout

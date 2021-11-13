@@ -15,7 +15,7 @@ func HashPassword(password string, uuid uint32) string {
 
 // strips user PII and returns their data as JSON
 func StripPII(user *datastructs.User) string {
-	strippedUser := &datastructs.User{
+	strippedUser := datastructs.User{
 		UUID:         0,
 		Username:     user.Username,
 		Email:        user.Email,
