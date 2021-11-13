@@ -1,1 +1,3 @@
-# medialogger-rest-api
+# MediaLogger REST API
+
+This project's goal is to serve as a first foray into Go development for me, but also serve as a basic skeleton of a server to support a mobile app I eventually intend to work on. MediaLogger (working title!) will function as a way to organize your media to-do list all in one place: movies you intend to watch, books you plan on reading, games you've always wanted to play, and shows you're behind on can all be tagged, split into sub-lists, and ordered in whatever way you want, all with cloud sync capability. Future integration with APIs for sites IMDB, Goodreads, MyAnimeList, and other similar sites will be considered, if workable!
