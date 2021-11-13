@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/base64"
-	"fmt"
 	"math/rand"
 	"medialogger/server/datastructs"
 	"medialogger/server/privacy"
@@ -225,7 +224,6 @@ func postLogout(c *gin.Context) {
 
 func validateSessionToken(c *gin.Context) bool {
 	authHeader := c.GetHeader("Authorization")
-	fmt.Println("Auth Header: " + authHeader)
 	auth := strings.Split(authHeader, " ")
 	if authHeader == "" || len(auth) != 2 || auth[0] != "Basic" {
 		c.String(http.StatusBadRequest, "No session token or badly formed session token.")
@@ -234,7 +232,6 @@ func validateSessionToken(c *gin.Context) bool {
 	username := c.Param("name")
 	var user, userExists = users[username]
 	var tokenArr, err = base64.StdEncoding.DecodeString(auth[1])
-	fmt.Println("Token: " + string(tokenArr))
 	if err != nil {
 		c.String(http.StatusBadRequest, "No session token or badly formed session token.")
 		return false
