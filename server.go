@@ -83,7 +83,11 @@ func getEmail(c *gin.Context) {
 func postEmail(c *gin.Context) {
 	if validateSessionToken(c) {
 		user := users[c.Param("name")]
-		newEmail := c.GetString("newEmail")
+		newEmail := c.PostForm("newEmail")
+		if newEmail == "" {
+			c.String(http.StatusBadRequest, "No replacement email given.")
+			return
+		}
 		user.Email = newEmail
 		c.String(http.StatusOK, newEmail)
 	}
@@ -92,7 +96,7 @@ func postEmail(c *gin.Context) {
 func postPassword(c *gin.Context) {
 	if validateSessionToken(c) {
 		user := users[c.Param("name")]
-		oldPassword := c.GetString("oldPassword")
+		oldPassword := c.PostForm("oldPassword")
 		if oldPassword == "" {
 			c.String(http.StatusBadRequest, "No password given.")
 			return
@@ -101,7 +105,7 @@ func postPassword(c *gin.Context) {
 			c.String(http.StatusUnauthorized, "Bad password.")
 			return
 		}
-		newPassword := c.GetString("newPassword")
+		newPassword := c.PostForm("newPassword")
 		if newPassword == "" {
 			c.String(http.StatusBadRequest, "No new password given.")
 			return
@@ -159,6 +163,7 @@ func getMedia(c *gin.Context) {
 	}
 }
 
+// Deletes the media item specified by the parameter
 func deleteMedia(c *gin.Context) {
 	if validateSessionToken(c) {
 		user := users[c.Param("name")]
@@ -192,6 +197,7 @@ func findMediaUID(user *datastructs.User, uid uint32) (*datastructs.MediaItem, i
 	return mediaMatch, index
 }
 
+// These functions will be added at a later point.
 // func putList() {
 
 // }
