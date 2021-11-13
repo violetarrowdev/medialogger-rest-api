@@ -48,7 +48,7 @@ Returns a list of all media the user has added to their account.
 
 ### PUT
 
-Adds a new piece of media to the user's account which must have a unique UID. If the UID is not unique, the request will fail. See the section on [MediaItem formatting](##mediaitem) for more information. Returns `201 Created` when successful.
+Adds a new piece of media to the user's account which must have a unique UID. If the UID is not unique, the request will fail. See the section on [MediaItem formatting](#mediaitem) for more information. Returns `201 Created` when successful.
 
 ## /users/:name/media/:uid
 
