@@ -12,6 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// TODO: Store this in a database instead!
 var users = map[string]*datastructs.User{
 	"default": {
 		UUID:         1,
