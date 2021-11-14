@@ -113,6 +113,7 @@ func postPassword(c *gin.Context) {
 	}
 }
 
+// Adds a new piece of media to the given user.
 func putMedia(c *gin.Context) {
 	if validateSessionToken(c) {
 		user := users[c.Param("name")]
@@ -123,11 +124,18 @@ func putMedia(c *gin.Context) {
 			return
 		}
 
+		var _, uidIndex = findMediaUID(user, newMedia.UID)
+
+		if uidIndex >= 0 {
+			c.String(http.StatusUnprocessableEntity, "UID already exists. Use POST at the proper endpoint to overwrite existing media.")
+		}
+
 		user.SavedMedia = append(user.SavedMedia, newMedia)
 		c.JSON(http.StatusCreated, newMedia)
 	}
 }
 
+// Updates a piece of media matching the UID parameter for the given user with the new data provided.
 func postMedia(c *gin.Context) {
 	if validateSessionToken(c) {
 		user := users[c.Param("name")]
@@ -148,7 +156,7 @@ func postMedia(c *gin.Context) {
 				c.JSON(http.StatusCreated, *media)
 			}
 		} else {
-			c.String(http.StatusMethodNotAllowed, "Use PUT to add new media.")
+			c.String(http.StatusUnprocessableEntity, "Use PUT to add new media.")
 		}
 	}
 }
@@ -180,7 +188,8 @@ func deleteMedia(c *gin.Context) {
 	}
 }
 
-// Finds a media item under the given user that matches the provided UID; the second return value is false if no such item is found.
+// Finds a media item under the given user that matches the provided UID; the second return value is -1 if no such
+// media item is found, and otherwise returns the index of the media item.
 // Simple inefficient search, will replace this with sorting + sensible efficient search in time
 func findMediaUID(user *datastructs.User, uid uint32) (*datastructs.MediaItem, int) {
 	var mediaMatch *datastructs.MediaItem
@@ -213,6 +222,7 @@ func findMediaUID(user *datastructs.User, uid uint32) (*datastructs.MediaItem, i
 
 // }
 
+// Clears the user's session token, logging them out.
 func postLogout(c *gin.Context) {
 	if validateSessionToken(c) {
 		username := c.Param("user")
@@ -222,6 +232,7 @@ func postLogout(c *gin.Context) {
 	}
 }
 
+// Checks whether the session token of the request matches that of the user in the request. Returns false and sends an HTTP response if it's not a match.
 func validateSessionToken(c *gin.Context) bool {
 	authHeader := c.GetHeader("Authorization")
 	auth := strings.Split(authHeader, " ")
