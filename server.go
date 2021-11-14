@@ -25,6 +25,9 @@ var users = map[string]*datastructs.User{
 }
 
 func main() {
+
+	// TODO: import config settings here
+
 	router := gin.Default()
 
 	router.POST("/login", postLogin)
@@ -58,8 +61,12 @@ func postLogin(c *gin.Context) {
 		c.String(http.StatusUnauthorized, "Bad username or password.")
 		return
 	}
+
+	// Token generation should be seeded with time and should use the crypto/rand package instead
 	var token = rand.Uint32()
 	user.SessionToken = token
+
+	// TODO: Start timeout goroutine here
 
 	c.String(http.StatusOK, "%d", token)
 }
@@ -232,7 +239,7 @@ func postLogout(c *gin.Context) {
 	}
 }
 
-// Checks whether the session token of the request matches that of the user in the request. Returns false and sends an HTTP response if it's not a match.
+// Checks whether the session token of the request matches that of the user in the request. Returns false and sends an HTTP error if it's not a match.
 func validateSessionToken(c *gin.Context) bool {
 	authHeader := c.GetHeader("Authorization")
 	auth := strings.Split(authHeader, " ")
@@ -242,11 +249,13 @@ func validateSessionToken(c *gin.Context) bool {
 	}
 	username := c.Param("name")
 	var user, userExists = users[username]
+	// Check if token with decode from base 64 into a byte string
 	var tokenArr, err = base64.StdEncoding.DecodeString(auth[1])
 	if err != nil {
 		c.String(http.StatusBadRequest, "No session token or badly formed session token.")
 		return false
 	}
+	// Trim out leading colon from not having a username in authentication header
 	tokenStr := strings.Trim(string(tokenArr), ":")
 
 	token, tokenErr := strconv.Atoi(tokenStr)
@@ -254,6 +263,7 @@ func validateSessionToken(c *gin.Context) bool {
 		c.String(http.StatusBadRequest, "No session token or badly formed session token.")
 		return false
 	}
+	// Check if session token is correct
 	if !userExists || user.SessionToken != uint32(token) || token <= 0 {
 		c.String(http.StatusUnauthorized, "User does not exist, or you are not logged into this account.")
 		return false
